@@ -34,3 +34,8 @@ pruner.run()
 You can also run a pruner from the command line::
 
     python -m depgraph_hsic_only --pruner hsic --pretrained model.pt
+
+The repository provides a sample training configuration in ``default.yaml``.
+This file contains the dataset path and basic parameters used by
+``DefaultYolov8SegPruner``.  Pass a different file via ``--cfg`` to customize
+the training behaviour.
