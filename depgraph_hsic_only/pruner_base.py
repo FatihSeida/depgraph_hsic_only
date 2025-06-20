@@ -1,3 +1,5 @@
+"""Base classes defining the pruning workflow."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -7,6 +9,7 @@ class Yolov8SegPruner(ABC):
     """Abstract base class for pruning YOLOv8n-seg backbone layers."""
 
     def __init__(self, pretrained_path: str = "yolov8n-seg.pt") -> None:
+        """Store path to pretrained weights."""
         self.pretrained_path = pretrained_path
 
     def run(self) -> None:

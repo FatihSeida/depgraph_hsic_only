@@ -1,3 +1,5 @@
+"""Command-line interface for running the default pruner."""
+
 import argparse
 from depgraph_hsic_only.yolov8_pruner import DefaultYolov8SegPruner
 

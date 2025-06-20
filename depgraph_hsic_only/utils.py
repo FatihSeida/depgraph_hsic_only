@@ -1,4 +1,4 @@
-# Helpers for pruning YOLOv8 segmentation models.
+"""Helper utilities for pruning YOLOv8 segmentation models."""
 
 from __future__ import annotations
 
@@ -23,12 +23,10 @@ from ultralytics.utils import (
     DEFAULT_CFG_DICT,
     DEFAULT_CFG_KEYS,
 )
-
 from ultralytics.utils.checks import check_yaml
 from ultralytics.utils.torch_utils import de_parallel
+
 from ultralytics.nn.tasks import attempt_load_one_weight
-
-
 
 __all__ = [
     "save_pruning_performance_graph",
@@ -82,8 +80,18 @@ def save_pruning_performance_graph(
     min_y1 = y1[min_y1_idx]
     max_y2 = y2_ratio[max_y2_idx]
     min_y2 = y2_ratio[min_y2_idx]
-    ax.text(x[max_y1_idx], max_y1 - 0.05, f"max mAP = {max_y1:.2f}", fontsize=10)
-    ax.text(x[min_y1_idx], min_y1 + 0.02, f"min mAP = {min_y1:.2f}", fontsize=10)
+    ax.text(
+        x[max_y1_idx],
+        max_y1 - 0.05,
+        f"max mAP = {max_y1:.2f}",
+        fontsize=10,
+    )
+    ax.text(
+        x[min_y1_idx],
+        min_y1 + 0.02,
+        f"min mAP = {min_y1:.2f}",
+        fontsize=10,
+    )
     ax2.text(
         x[max_y2_idx],
         max_y2 - 0.05,
@@ -105,13 +113,25 @@ def save_pruning_performance_graph(
 # ------------------------------------------------------------------------------
 
 def infer_shortcut(bottleneck: Bottleneck) -> bool:
+    """Return True if the bottleneck can use a shortcut connection."""
     c1 = bottleneck.cv1.conv.in_channels
     c2 = bottleneck.cv2.conv.out_channels
     return c1 == c2 and hasattr(bottleneck, "add") and bottleneck.add
 
 
 class C2f_v2(nn.Module):
-    def __init__(self, c1: int, c2: int, n: int = 1, shortcut: bool = False, g: int = 1, e: float = 0.5):
+    """Variant of the C2f block that splits input channels."""
+
+    def __init__(
+        self,
+        c1: int,
+        c2: int,
+        n: int = 1,
+        shortcut: bool = False,
+        g: int = 1,
+        e: float = 0.5,
+    ) -> None:
+        """Initialize the block configuration."""
         super().__init__()
         self.c = int(c2 * e)
         self.cv0 = Conv(c1, self.c, 1, 1)
@@ -122,13 +142,15 @@ class C2f_v2(nn.Module):
             for _ in range(n)
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:  # pragma: no cover - simple wrapper
+    def forward(self, x: torch.Tensor) -> torch.Tensor:  # pragma: no cover
+        """Forward pass."""
         y = [self.cv0(x), self.cv1(x)]
         y.extend(m(y[-1]) for m in self.m)
         return self.cv2(torch.cat(y, 1))
 
 
 def transfer_weights(c2f: C2f, c2f_v2: C2f_v2) -> None:
+    """Copy weights from a ``C2f`` module to ``C2f_v2``."""
     c2f_v2.cv2 = c2f.cv2
     c2f_v2.m = c2f.m
     state_dict = c2f.state_dict()
@@ -152,6 +174,7 @@ def transfer_weights(c2f: C2f, c2f_v2: C2f_v2) -> None:
 
 
 def replace_c2f_with_c2f_v2(module: nn.Module) -> None:
+    """Recursively replace all ``C2f`` modules with :class:`C2f_v2`."""
     for name, child_module in module.named_children():
         if isinstance(child_module, C2f):
             shortcut = infer_shortcut(child_module.m[0])
@@ -174,6 +197,7 @@ def replace_c2f_with_c2f_v2(module: nn.Module) -> None:
 # ------------------------------------------------------------------------------
 
 def save_model_v2(self: BaseTrainer) -> None:
+    """Persist training checkpoint information."""
     ckpt = {
         "epoch": self.epoch,
         "best_fitness": self.best_fitness,
@@ -188,12 +212,17 @@ def save_model_v2(self: BaseTrainer) -> None:
     torch.save(ckpt, self.last)
     if self.best_fitness == self.fitness:
         torch.save(ckpt, self.best)
-    if (self.epoch > 0) and (self.save_period > 0) and (self.epoch % self.save_period == 0):
+    if (
+        self.epoch > 0
+        and self.save_period > 0
+        and (self.epoch % self.save_period == 0)
+    ):
         torch.save(ckpt, self.wdir / f"epoch{self.epoch}.pt")
     del ckpt
 
 
 def final_eval_v2(self: BaseTrainer) -> None:
+    """Validate the last and best checkpoints without optimizers."""
     for f in self.last, self.best:
         if f.exists():
             strip_optimizer_v2(f)
@@ -205,6 +234,7 @@ def final_eval_v2(self: BaseTrainer) -> None:
 
 
 def strip_optimizer_v2(f: Union[str, Path] = "best.pt", s: str = "") -> None:
+    """Remove optimizer state for smaller checkpoints."""
     x = torch.load(f, map_location=torch.device("cpu"))
     args = {**DEFAULT_CFG_DICT, **x["train_args"]}
     if x.get("ema"):
@@ -216,30 +246,49 @@ def strip_optimizer_v2(f: Union[str, Path] = "best.pt", s: str = "") -> None:
     x["train_args"] = {k: v for k, v in args.items() if k in DEFAULT_CFG_KEYS}
     torch.save(x, s or f)
     mb = os.path.getsize(s or f) / 1e6
-    LOGGER.info(f"Optimizer stripped from {f},{f' saved as {s},' if s else ''} {mb:.1f}MB")
+    LOGGER.info(
+        "Optimizer stripped from %s,%s %.1fMB",
+        f,
+        f" saved as {s}," if s else "",
+        mb,
+    )
 
 
 def train_v2(self: YOLO, pruning: bool = False, **kwargs) -> None:
+    """Training loop supporting pruning mode."""
     self._check_is_pytorch_model()
     if self.session:
         if any(kwargs):
-            LOGGER.warning("WARNING ⚠️ using HUB training arguments, ignoring local training arguments.")
+            LOGGER.warning(
+                "WARNING ⚠️ using HUB training arguments, ignoring local "
+                "training arguments."
+            )
         kwargs = self.session.train_args
     overrides = self.overrides.copy()
     overrides.update(kwargs)
     if kwargs.get("cfg"):
-        LOGGER.info(f"cfg file passed. Overriding default params with {kwargs['cfg']}.")
+        LOGGER.info(
+            f"cfg file passed. Overriding default params with {kwargs['cfg']}."
+        )
         overrides = YAML.load(check_yaml(kwargs["cfg"]))
     overrides["mode"] = "train"
     if not overrides.get("data"):
-        raise AttributeError("Dataset required but missing, i.e. pass 'data=coco128.yaml'")
+        raise AttributeError(
+            "Dataset required but missing, i.e. pass 'data=coco128.yaml'"
+        )
     if overrides.get("resume"):
         overrides["resume"] = self.ckpt_path
     self.task = overrides.get("task") or self.task
-    self.trainer = self.task_map[self.task]["trainer"](overrides=overrides, _callbacks=self.callbacks)
+    self.trainer = self.task_map[self.task]["trainer"](
+        overrides=overrides,
+        _callbacks=self.callbacks,
+    )
     if not pruning:
         if not overrides.get("resume"):
-            self.trainer.model = self.trainer.get_model(weights=self.model if self.ckpt else None, cfg=self.model.yaml)
+            self.trainer.model = self.trainer.get_model(
+                weights=self.model if self.ckpt else None,
+                cfg=self.model.yaml,
+            )
             self.model = self.trainer.model
     else:
         self.trainer.pruning = True

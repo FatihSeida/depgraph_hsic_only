@@ -1,4 +1,5 @@
-import importlib
+"""Tests for the abstract pruner base class."""
+
 import sys
 import types
 import pytest
@@ -8,7 +9,7 @@ dummy_mod1 = types.ModuleType('depgraph_hsic_only.yolov8_pruner')
 dummy_mod1.DefaultYolov8SegPruner = object
 sys.modules.setdefault('depgraph_hsic_only.yolov8_pruner', dummy_mod1)
 
-from depgraph_hsic_only.pruner_base import Yolov8SegPruner
+from depgraph_hsic_only.pruner_base import Yolov8SegPruner  # noqa: E402
 
 
 class DummyPruner(Yolov8SegPruner):

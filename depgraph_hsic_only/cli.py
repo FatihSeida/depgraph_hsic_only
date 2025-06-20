@@ -1,3 +1,5 @@
+"""CLI helper for executing the default YOLOv8 pruner."""
+
 import argparse
 
 from .yolov8_pruner import DefaultYolov8SegPruner
