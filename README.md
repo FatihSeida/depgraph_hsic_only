@@ -17,6 +17,8 @@ The repository now includes two implementations:
   HSIC‑Lasso.  Filters with zero coefficients are removed and the graph is
   updated before fine‑tuning.
 
+  HSIC-based pruning requires the optional `pyHSICLasso` package.
+
 Both classes load a pretrained model, run training, prune the backbone layers
 and export the result to ONNX format.  Utility helpers for model conversion,
 training hooks and metric plotting are provided in ``depgraph_hsic_only.utils``.
