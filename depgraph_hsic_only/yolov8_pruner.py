@@ -29,13 +29,14 @@ import torch
 import torch.nn as nn
 from matplotlib import pyplot as plt
 from ultralytics import YOLO, __version__
-from ultralytics.nn.modules import Detect, C2f, Conv, Bottleneck
+from ultralytics.nn.modules.head import Detect
+from ultralytics.nn.modules.block import C2f, Bottleneck
+from ultralytics.nn.modules.conv import Conv
 from ultralytics.nn.tasks import attempt_load_one_weight
-from ultralytics.yolo.engine.model import TASK_MAP
-from ultralytics.yolo.engine.trainer import BaseTrainer
-from ultralytics.yolo.utils import yaml_load, LOGGER, RANK, DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS
-from ultralytics.yolo.utils.checks import check_yaml
-from ultralytics.yolo.utils.torch_utils import initialize_weights, de_parallel
+from ultralytics.engine.trainer import BaseTrainer
+from ultralytics.utils import yaml_load, LOGGER, RANK, DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS
+from ultralytics.utils.checks import check_yaml
+from ultralytics.utils.torch_utils import initialize_weights, de_parallel
 
 import torch_pruning as tp
 
