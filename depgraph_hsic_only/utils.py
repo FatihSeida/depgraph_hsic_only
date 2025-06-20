@@ -13,19 +13,19 @@ import torch
 import torch.nn as nn
 from matplotlib import pyplot as plt
 from ultralytics import YOLO, __version__
-from ultralytics.nn.modules import C2f, Conv, Bottleneck
-from ultralytics.yolo.engine.trainer import BaseTrainer
-from ultralytics.yolo.utils import (
-    yaml_load,
+from ultralytics.nn.modules.block import C2f, Bottleneck
+from ultralytics.nn.modules.conv import Conv
+from ultralytics.engine.trainer import BaseTrainer
+from ultralytics.utils import (
+    YAML,
     LOGGER,
     RANK,
     DEFAULT_CFG_DICT,
     DEFAULT_CFG_KEYS,
 )
-from ultralytics.yolo.utils.checks import check_yaml
-from ultralytics.yolo.utils.torch_utils import de_parallel
+from ultralytics.utils.checks import check_yaml
+from ultralytics.utils.torch_utils import de_parallel
 from ultralytics.nn.tasks import attempt_load_one_weight
-from ultralytics.yolo.engine.model import TASK_MAP
 
 
 
@@ -228,14 +228,14 @@ def train_v2(self: YOLO, pruning: bool = False, **kwargs) -> None:
     overrides.update(kwargs)
     if kwargs.get("cfg"):
         LOGGER.info(f"cfg file passed. Overriding default params with {kwargs['cfg']}.")
-        overrides = yaml_load(check_yaml(kwargs["cfg"]))
+        overrides = YAML.load(check_yaml(kwargs["cfg"]))
     overrides["mode"] = "train"
     if not overrides.get("data"):
         raise AttributeError("Dataset required but missing, i.e. pass 'data=coco128.yaml'")
     if overrides.get("resume"):
         overrides["resume"] = self.ckpt_path
     self.task = overrides.get("task") or self.task
-    self.trainer = TASK_MAP[self.task][1](overrides=overrides, _callbacks=self.callbacks)
+    self.trainer = self.task_map[self.task]["trainer"](overrides=overrides, _callbacks=self.callbacks)
     if not pruning:
         if not overrides.get("resume"):
             self.trainer.model = self.trainer.get_model(weights=self.model if self.ckpt else None, cfg=self.model.yaml)
