@@ -30,3 +30,7 @@ from depgraph_hsic_only import HSICYolov8SegPruner
 pruner = HSICYolov8SegPruner(ratio_target=0.6)
 pruner.run()
 ```
+
+You can also run a pruner from the command line::
+
+    python -m depgraph_hsic_only --pruner hsic --pretrained model.pt
