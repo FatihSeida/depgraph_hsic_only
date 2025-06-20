@@ -9,4 +9,10 @@ The initial implementation contains an abstract base class, `Yolov8SegPruner`, w
 3. Prune backbone layers 0–9.
 4. Fine-tune the pruned model.
 
-Concrete subclasses should implement the actual logic for each step. All methods raise `NotImplementedError` by default.
+The repository now includes an example implementation, `DefaultYolov8SegPruner`,
+which adapts code from the Torch-Pruning project to perform iterative pruning
+and fine‑tuning.  It loads a pretrained model, runs training, prunes the
+backbone layers, fine‑tunes, and finally exports the model to ONNX format.
+
+Developers can subclass `Yolov8SegPruner` to customize the process or reuse the
+provided implementation as a starting point.
