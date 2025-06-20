@@ -1,14 +1,16 @@
-# Sample training configuration for DefaultYolov8SegPruner
+# Default training configuration for DefaultYolov8SegPruner
+# Mirrors the basic arguments found in ultralytics/cfg/default.yaml
 # Adjust paths and parameters as needed.
 
-# task type
+# Task type
 task: segment
-# dataset configuration
+# Model architecture or pretrained weights
+model: yolov8n-seg.pt
+# Dataset configuration
 data: coco128-seg.yaml
-# number of epochs for the initial training run
+# Number of epochs for the initial training run
 epochs: 50
-# training batch size
+# Training batch size
 batch: 4
-# input image size
+# Input image size
 imgsz: 640
-

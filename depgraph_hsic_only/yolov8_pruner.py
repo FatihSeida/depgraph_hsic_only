@@ -64,6 +64,7 @@ class DefaultYolov8SegPruner(Yolov8SegPruner):
         cfg = YAML.load(check_yaml(self.cfg))
         model.train_v2(**cfg)
 
+
     def prune_backbone(self, model: YOLO) -> None:
         """Prune backbone layers and record metrics."""
         pruning_cfg = YAML.load(check_yaml(self.cfg))
@@ -176,9 +177,7 @@ class DefaultYolov8SegPruner(Yolov8SegPruner):
         """Fine-tune the pruned model."""
         if self._batch_size is None:
             raise RuntimeError("Model must be pruned before fine tuning")
-        cfg = YAML.load(check_yaml(self.cfg))
-        cfg['batch'] = self._batch_size
-        model.train_v2(pruning=True, **cfg)
+        model.train_v2(pruning=True, cfg=self.cfg, batch=self._batch_size)
 
     def save_model(self, model: YOLO) -> None:
         """Export the model to ONNX format."""
