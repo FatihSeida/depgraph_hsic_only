@@ -3,75 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-import tempfile
-import os
 
 import torch
 from ultralytics import YOLO
 
 from .base import BasePruningPipeline
 from prune_methods.hsic_lasso import HsicLassoPruner
-from metric_collector import TrainingMetricCollector, PruningMetricCollector
+from metric_collector import YoloTrainingMetrics, YoloPruningMetrics
 
 
-class _TrainingMetrics(TrainingMetricCollector):
-    """Simple training metrics wrapper for YOLO results."""
-
-    def __init__(self, metrics: dict | None = None):
-        self._m = metrics or {}
-
-    @property
-    def map(self) -> float:  # type: ignore[override]
-        return float(self._m.get("metrics/mAP50", 0.0))
-
-    @property
-    def recall(self) -> float:  # type: ignore[override]
-        return float(self._m.get("metrics/recall", 0.0))
-
-    @property
-    def precision(self) -> float:  # type: ignore[override]
-        return float(self._m.get("metrics/precision", 0.0))
-
-    @property
-    def map50_95(self) -> float:  # type: ignore[override]
-        return float(self._m.get("metrics/mAP50-95", 0.0))
-
-
-class _PruningMetrics(PruningMetricCollector):
-    """Collect simple pruning statistics."""
-
-    def __init__(self, model: torch.nn.Module, baseline_params: int | None = None):
-        self._params = sum(p.numel() for p in model.parameters())
-        self._size = self._calc_size(model)
-        self._flops = 0.0
-        if baseline_params:
-            self._filter_reduction = 1.0 - self._params / baseline_params
-        else:
-            self._filter_reduction = 0.0
-
-    @staticmethod
-    def _calc_size(model: torch.nn.Module) -> float:
-        with tempfile.NamedTemporaryFile(suffix=".pt", delete=False) as f:
-            torch.save(model.state_dict(), f.name)
-            size = os.path.getsize(f.name) / 1e6
-        os.unlink(f.name)
-        return size
-
-    @property
-    def flops(self) -> float:  # type: ignore[override]
-        return self._flops
-
-    @property
-    def parameters(self) -> int:  # type: ignore[override]
-        return self._params
-
-    @property
-    def size(self) -> float:  # type: ignore[override]
-        return self._size
-
-    @property
-    def filter_reduction(self) -> float:  # type: ignore[override]
-        return self._filter_reduction
 
 
 class YoloPipeline(BasePruningPipeline):
@@ -84,8 +24,8 @@ class YoloPipeline(BasePruningPipeline):
         self.device = device
         self.yolo: YOLO | None = None
         self._baseline_params: int | None = None
-        self.training_metrics: _TrainingMetrics | None = None
-        self.pruning_metrics: _PruningMetrics | None = None
+        self.training_metrics: YoloTrainingMetrics | None = None
+        self.pruning_metrics: YoloPruningMetrics | None = None
 
     # ---------------------------------------------------------
     # Pipeline stages
@@ -103,11 +43,11 @@ class YoloPipeline(BasePruningPipeline):
     def fine_tune(self) -> None:  # type: ignore[override]
         assert self.yolo is not None
         metrics = self.yolo.train(data=self.data, epochs=max(1, self.epochs // 2), device=self.device)
-        self.training_metrics = _TrainingMetrics(metrics or {})
+        self.training_metrics = YoloTrainingMetrics.from_results(metrics)
 
     def collect_metrics(self) -> None:  # type: ignore[override]
         assert self.yolo is not None
-        self.pruning_metrics = _PruningMetrics(self.yolo.model, self._baseline_params)
+        self.pruning_metrics = YoloPruningMetrics.from_model(self.yolo.model, self._baseline_params)
 
     def visualize_results(self) -> None:  # type: ignore[override]
         if self.training_metrics:
