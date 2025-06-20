@@ -93,12 +93,23 @@ class DefaultYolov8SegPruner(Yolov8SegPruner):
         map_list.append(init_map)
         pruned_map_list.append(init_map)
         pruning_ratio = 1 - math.pow((1 - self.target_prune_rate), 1 / self.iterative_steps)
+        # Only prune layers 0-9 of the internal ``model.model.model``
+        # list.  ``YOLO.model`` contains a ``ModuleList`` where the
+        # first 10 entries form the backbone.  All later layers are
+        # detection heads or other blocks that should remain intact
+        # during pruning.  We mark them as ignored so ``GroupNormPruner``
+        # will operate solely on the backbone modules.
+        backbone_limit = 10
+        head_modules = list(model.model.model[backbone_limit:])
+
         for i in range(self.iterative_steps):
             model.model.train()
             for _, param in model.model.named_parameters():
                 param.requires_grad = True
             ignored_layers = []
             unwrapped_parameters = []
+            ignored_layers.extend(head_modules)
+            # Also ignore explicit Detect layers inside the model
             for m in model.model.modules():
                 if isinstance(m, (Detect,)):
                     ignored_layers.append(m)
