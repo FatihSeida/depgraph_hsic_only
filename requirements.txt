@@ -1,0 +1,6 @@
+# Basic dependencies for running the YOLOv8 segmentation pruner
+ultralytics
+torch
+torch-pruning
+matplotlib
+numpy

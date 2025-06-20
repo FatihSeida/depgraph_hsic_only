@@ -36,3 +36,28 @@ The repository provides a sample training configuration in ``default.yaml``.
 This file contains the dataset path and basic parameters used by
 ``DefaultYolov8SegPruner``.  Pass a different file via ``--cfg`` to customize
 the training behaviour.
+
+## Installation
+
+Install the required Python packages using ``pip``.  The repository includes
+a ``requirements.txt`` file::
+
+    pip install -r requirements.txt
+
+The default configuration expects the COCO128 segmentation dataset referenced
+in ``default.yaml`` (``data: coco128-seg.yaml``).  Ensure the dataset file is
+available locally or adjust the ``data`` path in the configuration.
+
+Running the pruner requires a recent PyTorch installation and, ideally, access
+to a CUDA-capable GPU for training and pruning.
+
+## Usage
+
+After installing the dependencies, you can invoke the package module or the
+stand‑alone script.  To run via the module entry point::
+
+    python -m depgraph_hsic_only --pretrained yolov8n-seg.pt
+
+Or run ``prune.py`` directly::
+
+    python prune.py --pretrained yolov8n-seg.pt --cfg default.yaml
