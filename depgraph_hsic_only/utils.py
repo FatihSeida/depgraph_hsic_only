@@ -23,6 +23,7 @@ from ultralytics.utils import (
     DEFAULT_CFG_DICT,
     DEFAULT_CFG_KEYS,
 )
+
 from ultralytics.utils.checks import check_yaml
 from ultralytics.utils.torch_utils import de_parallel
 from ultralytics.nn.tasks import attempt_load_one_weight
