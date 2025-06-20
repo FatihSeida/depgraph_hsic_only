@@ -47,72 +47,76 @@ def load_pruner_module():
 
     # ultralytics stubs
     ultralytics = types.ModuleType("ultralytics")
-    ultralytics.YOLO = type("YOLO", (), {})
-    ultralytics.__version__ = "0"
 
-    nn_modules = types.ModuleType("ultralytics.nn.modules")
+    nn_head = types.ModuleType("ultralytics.nn.modules.head")
+    nn_block = types.ModuleType("ultralytics.nn.modules.block")
+    nn_conv = types.ModuleType("ultralytics.nn.modules.conv")
     class Dummy:  # simple placeholder
         pass
-    nn_modules.Detect = Dummy
-    nn_modules.C2f = Dummy
-    nn_modules.Conv = Dummy
-    nn_modules.Bottleneck = Dummy
+    nn_head.Detect = Dummy
+    nn_block.C2f = Dummy
+    nn_block.Bottleneck = Dummy
+    nn_conv.Conv = Dummy
 
     nn_tasks = types.ModuleType("ultralytics.nn.tasks")
     nn_tasks.attempt_load_one_weight = dummy
 
     ultralytics_nn = types.ModuleType("ultralytics.nn")
-    ultralytics_nn.modules = nn_modules
+    ultralytics_nn.modules = types.SimpleNamespace(
+        head=nn_head, block=nn_block, conv=nn_conv
+    )
     ultralytics_nn.tasks = nn_tasks
 
-    engine_model = types.ModuleType("ultralytics.yolo.engine.model")
-    engine_model.TASK_MAP = {"segment": (None, object)}
+    engine_model = types.ModuleType("ultralytics.engine.model")
 
-    engine_trainer = types.ModuleType("ultralytics.yolo.engine.trainer")
+    engine_trainer = types.ModuleType("ultralytics.engine.trainer")
     class BaseTrainer:
         pass
     engine_trainer.BaseTrainer = BaseTrainer
 
-    yolo_engine = types.ModuleType("ultralytics.yolo.engine")
+    yolo_engine = types.ModuleType("ultralytics.engine")
     yolo_engine.model = engine_model
     yolo_engine.trainer = engine_trainer
 
-    yolo_utils = types.ModuleType("ultralytics.yolo.utils")
+    yolo_utils = types.ModuleType("ultralytics.utils")
     yolo_utils.yaml_load = lambda *a, **k: {}
     yolo_utils.LOGGER = types.SimpleNamespace(info=dummy)
     yolo_utils.RANK = -1
     yolo_utils.DEFAULT_CFG_DICT = {}
     yolo_utils.DEFAULT_CFG_KEYS = []
 
-    checks = types.ModuleType("ultralytics.yolo.utils.checks")
+    checks = types.ModuleType("ultralytics.utils.checks")
     checks.check_yaml = lambda x: x
 
-    torch_utils = types.ModuleType("ultralytics.yolo.utils.torch_utils")
+    torch_utils = types.ModuleType("ultralytics.utils.torch_utils")
     torch_utils.initialize_weights = dummy
     torch_utils.de_parallel = lambda x: x
 
     yolo_utils.checks = checks
     yolo_utils.torch_utils = torch_utils
 
-    yolo_mod = types.ModuleType("ultralytics.yolo")
-    yolo_mod.engine = yolo_engine
-    yolo_mod.utils = yolo_utils
+    class YOLO:
+        task_map = {"segment": {"trainer": object}}
 
-    ultralytics.yolo = yolo_mod
+    ultralytics.engine = yolo_engine
+    ultralytics.utils = yolo_utils
     ultralytics.nn = ultralytics_nn
+    ultralytics.YOLO = YOLO
+    ultralytics.__version__ = "0"
 
     modules.update({
         "ultralytics": ultralytics,
+        "ultralytics.engine": yolo_engine,
+        "ultralytics.engine.model": engine_model,
+        "ultralytics.engine.trainer": engine_trainer,
+        "ultralytics.utils": yolo_utils,
+        "ultralytics.utils.checks": checks,
+        "ultralytics.utils.torch_utils": torch_utils,
         "ultralytics.nn": ultralytics_nn,
-        "ultralytics.nn.modules": nn_modules,
+        "ultralytics.nn.modules.head": nn_head,
+        "ultralytics.nn.modules.block": nn_block,
+        "ultralytics.nn.modules.conv": nn_conv,
         "ultralytics.nn.tasks": nn_tasks,
-        "ultralytics.yolo": yolo_mod,
-        "ultralytics.yolo.engine": yolo_engine,
-        "ultralytics.yolo.engine.model": engine_model,
-        "ultralytics.yolo.engine.trainer": engine_trainer,
-        "ultralytics.yolo.utils": yolo_utils,
-        "ultralytics.yolo.utils.checks": checks,
-        "ultralytics.yolo.utils.torch_utils": torch_utils,
     })
 
     with mock.patch.dict(sys.modules, modules):
