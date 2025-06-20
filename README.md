@@ -36,3 +36,12 @@ The repository provides a sample training configuration in ``default.yaml``.
 This file contains the dataset path and basic parameters used by
 ``DefaultYolov8SegPruner``.  Pass a different file via ``--cfg`` to customize
 the training behaviour.
+
+## Install dependencies
+
+Install the runtime packages using ``pip``::
+
+    pip install -r requirements.txt
+
+Creating a virtual environment (``python -m venv .venv``) beforehand is
+recommended to isolate the project's dependencies.
