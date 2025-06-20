@@ -62,7 +62,7 @@ class DefaultYolov8SegPruner(Yolov8SegPruner):
     def train(self, model: YOLO) -> None:
         """Train the model using the provided config."""
         cfg = YAML.load(check_yaml(self.cfg))
-        model.train_v2(**cfg)
+        model.train_v2(data=self.cfg, **cfg)
 
 
     def prune_backbone(self, model: YOLO) -> None:
