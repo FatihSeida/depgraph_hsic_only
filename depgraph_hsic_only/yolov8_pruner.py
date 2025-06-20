@@ -18,13 +18,8 @@ hooks live in :mod:`depgraph_hsic_only.utils`.
 """
 
 import math
-import os
 from copy import deepcopy
-from datetime import datetime
-from pathlib import Path
 from typing import List, Union
-
-import numpy as np
 import torch
 import torch.nn as nn
 from matplotlib import pyplot as plt
