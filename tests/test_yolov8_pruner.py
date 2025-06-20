@@ -79,7 +79,11 @@ def load_pruner_module():
     yolo_engine.trainer = engine_trainer
 
     yolo_utils = types.ModuleType("ultralytics.utils")
-    yolo_utils.yaml_load = lambda *a, **k: {}
+    class YAML:
+        @staticmethod
+        def load(*a, **k):
+            return {}
+    yolo_utils.YAML = YAML
     yolo_utils.LOGGER = types.SimpleNamespace(info=dummy)
     yolo_utils.RANK = -1
     yolo_utils.DEFAULT_CFG_DICT = {}

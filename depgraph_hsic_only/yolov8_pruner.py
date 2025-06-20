@@ -29,13 +29,7 @@ from ultralytics.nn.modules.block import C2f, Bottleneck
 from ultralytics.nn.modules.conv import Conv
 from ultralytics.nn.tasks import attempt_load_one_weight
 from ultralytics.engine.trainer import BaseTrainer
-try:  # pragma: no cover - fallback for older Ultralytics versions
-    from ultralytics.utils import yaml_load, DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS
-except Exception:  # pragma: no cover
-    from ultralytics.utils.files import yaml_load
-    from ultralytics.cfg import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS
-
-from ultralytics.utils import LOGGER, RANK
+from ultralytics.utils import YAML, LOGGER, RANK, DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS
 from ultralytics.utils.checks import check_yaml
 from ultralytics.utils.torch_utils import initialize_weights, de_parallel
 
@@ -69,11 +63,11 @@ class DefaultYolov8SegPruner(Yolov8SegPruner):
         return model
 
     def train(self, model: YOLO) -> None:
-        cfg = yaml_load(check_yaml(self.cfg))
+        cfg = YAML.load(check_yaml(self.cfg))
         model.train_v2(**cfg)
 
     def prune_backbone(self, model: YOLO) -> None:
-        pruning_cfg = yaml_load(check_yaml(self.cfg))
+        pruning_cfg = YAML.load(check_yaml(self.cfg))
         self._batch_size = pruning_cfg['batch']
         pruning_cfg['data'] = "coco128.yaml"
         pruning_cfg['epochs'] = 10
@@ -159,7 +153,7 @@ class DefaultYolov8SegPruner(Yolov8SegPruner):
     def fine_tune(self, model: YOLO) -> None:
         if self._batch_size is None:
             raise RuntimeError("Model must be pruned before fine tuning")
-        cfg = yaml_load(check_yaml(self.cfg))
+        cfg = YAML.load(check_yaml(self.cfg))
         cfg['batch'] = self._batch_size
         model.train_v2(pruning=True, **cfg)
 
