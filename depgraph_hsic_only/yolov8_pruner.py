@@ -1,4 +1,23 @@
+
 from __future__ import annotations
+
+"""Utilities for pruning YOLOv8 segmentation models.
+
+The module defines :class:`DefaultYolov8SegPruner` which implements the
+workflow described in :class:`~depgraph_hsic_only.pruner_base.Yolov8SegPruner`:
+
+1. ``load_pretrained_model`` obtains the pretrained weights.
+2. ``train`` performs an initial training run.
+3. ``prune_backbone`` iteratively prunes backbone layers using
+   Torch‑Pruning and records performance.
+4. ``fine_tune`` trains the pruned model.
+5. ``save_model`` exports the final result.
+
+Helper utilities include ``save_pruning_performance_graph`` for plotting the
+pruning progress, conversion helpers ``infer_shortcut``/``C2f_v2``/``transfer_weights``
+and ``replace_c2f_with_c2f_v2``, as well as training hooks
+``save_model_v2``, ``final_eval_v2``, ``strip_optimizer_v2`` and ``train_v2``.
+"""
 
 import argparse
 import math
