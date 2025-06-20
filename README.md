@@ -18,7 +18,8 @@ The repository now includes two implementations:
   updated before fine‑tuning.
 
 Both classes load a pretrained model, run training, prune the backbone layers
-and export the result to ONNX format.
+and export the result to ONNX format.  Utility helpers for model conversion,
+training hooks and metric plotting are provided in ``depgraph_hsic_only.utils``.
 
 Developers can subclass `Yolov8SegPruner` to customize the process or reuse the
 provided implementation as a starting point.
