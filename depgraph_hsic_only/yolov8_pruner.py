@@ -64,7 +64,6 @@ class DefaultYolov8SegPruner(Yolov8SegPruner):
         cfg = YAML.load(check_yaml(self.cfg))
         model.train_v2(**cfg)
 
-
     def prune_backbone(self, model: YOLO) -> None:
         """Prune backbone layers and record metrics."""
         pruning_cfg = YAML.load(check_yaml(self.cfg))
