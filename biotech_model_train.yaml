@@ -1,0 +1,17 @@
+# Dataset parameters
+path: "/home/jupyter-23523039/"  # Dataset root directory
+train: new_dir/train/images  # Training images (relative to 'path')
+val: new_dir/val/images     # Validation images (relative to 'path')
+test: new_dir/images/test  # Optional test images (relative to 'path')
+
+# Number of classes
+nc: 4  # Number of segmentation classes (excluding background)
+
+# Class names
+names:
+  0: explant
+  1: fungi
+  2: bakteri
+  3: callus
+
+weights: [0.25, 1.0, 1.0, 1.0]

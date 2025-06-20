@@ -17,7 +17,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--cfg",
-        default="default.yaml",
+        default="biotech_model_train.yaml",
         help="Training config for DefaultYolov8SegPruner",
     )
     args = parser.parse_args()
