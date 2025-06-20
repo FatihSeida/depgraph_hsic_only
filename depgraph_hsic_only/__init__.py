@@ -1,3 +1,5 @@
+"""Public API for the depgraph_hsic_only package."""
+
 from .pruner_base import Yolov8SegPruner
 from .yolov8_pruner import DefaultYolov8SegPruner
 

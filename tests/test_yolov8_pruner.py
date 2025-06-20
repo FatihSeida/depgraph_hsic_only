@@ -1,3 +1,5 @@
+"""Tests for DefaultYolov8SegPruner workflow."""
+
 import importlib
 import sys
 import types
@@ -5,8 +7,9 @@ from unittest import mock
 
 
 def load_pruner_module():
-    """Import depgraph_hsic_only.yolov8_pruner with heavy dependencies stubbed."""
-    dummy = lambda *args, **kwargs: None
+    """Import pruner module with heavy dependencies stubbed."""
+    def dummy(*args, **kwargs):
+        return None
     modules = {}
 
     # torch stub
@@ -17,6 +20,7 @@ def load_pruner_module():
     torch_mod.device = lambda *a, **k: None
     torch_mod.Tensor = object
     torch_nn = types.ModuleType("torch.nn")
+
     class Module:
         def __init__(self, *a, **k):
             pass
@@ -51,6 +55,7 @@ def load_pruner_module():
     nn_head = types.ModuleType("ultralytics.nn.modules.head")
     nn_block = types.ModuleType("ultralytics.nn.modules.block")
     nn_conv = types.ModuleType("ultralytics.nn.modules.conv")
+
     class Dummy:  # simple placeholder
         pass
     nn_head.Detect = Dummy
@@ -70,6 +75,7 @@ def load_pruner_module():
     engine_model = types.ModuleType("ultralytics.engine.model")
 
     engine_trainer = types.ModuleType("ultralytics.engine.trainer")
+
     class BaseTrainer:
         pass
     engine_trainer.BaseTrainer = BaseTrainer
@@ -79,6 +85,7 @@ def load_pruner_module():
     yolo_engine.trainer = engine_trainer
 
     yolo_utils = types.ModuleType("ultralytics.utils")
+
     class YAML:
         @staticmethod
         def load(*a, **k):
@@ -136,11 +143,27 @@ def test_default_pruner_run_sequence():
     model = object()
     calls = []
 
-    with mock.patch.object(pruner, "load_pretrained_model", return_value=model) as load_mock, \
-         mock.patch.object(pruner, "train", side_effect=lambda m: calls.append("train")) as train_mock, \
-         mock.patch.object(pruner, "prune_backbone", side_effect=lambda m: calls.append("prune")) as prune_mock, \
-         mock.patch.object(pruner, "fine_tune", side_effect=lambda m: calls.append("fine_tune")) as fine_mock, \
-         mock.patch.object(pruner, "save_model", side_effect=lambda m: calls.append("save")) as save_mock:
+    with mock.patch.object(
+        pruner,
+        "load_pretrained_model",
+        return_value=model,
+    ) as load_mock, mock.patch.object(
+        pruner,
+        "train",
+        side_effect=lambda m: calls.append("train"),
+    ) as train_mock, mock.patch.object(
+        pruner,
+        "prune_backbone",
+        side_effect=lambda m: calls.append("prune"),
+    ) as prune_mock, mock.patch.object(
+        pruner,
+        "fine_tune",
+        side_effect=lambda m: calls.append("fine_tune"),
+    ) as fine_mock, mock.patch.object(
+        pruner,
+        "save_model",
+        side_effect=lambda m: calls.append("save"),
+    ) as save_mock:
         pruner.run()
 
     assert calls == ["train", "prune", "fine_tune", "save"]
