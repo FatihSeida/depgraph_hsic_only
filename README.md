@@ -14,6 +14,10 @@ The repository now includes an example implementation,
 perform iterative magnitude pruning and fine‑tuning.  It loads a pretrained
 model, runs training, prunes the backbone layers, fine‑tunes, and finally exports the model to ONNX format. Utility helpers for model conversion, training hooks and metric plotting are provided in ``depgraph_hsic_only.utils``.
 
+In addition, ``HsicLassoPruner`` implements pruning using HSIC‑Lasso scores.
+This method measures the dependency between input and output feature maps and
+removes filters with scores below a configurable threshold.
+
 Developers can subclass `Yolov8SegPruner` to customize the process or reuse the
 provided implementation as a starting point.
 
@@ -24,6 +28,13 @@ pruner = DefaultYolov8SegPruner(pretrained_path="yolov8n-seg.pt", cfg="default.y
 pruner.run()
 ```
 
+The HSIC based approach can be invoked similarly::
+
+    from depgraph_hsic_only import HsicLassoPruner
+
+    pruner = HsicLassoPruner()
+    pruner.prune(model)
+
 You can also run the pruner from the command line::
 
     python -m depgraph_hsic_only --pretrained model.pt
@@ -31,6 +42,9 @@ You can also run the pruner from the command line::
 Alternatively run the default implementation directly with ``prune.py``::
 
     python prune.py --pretrained yolov8n-seg.pt --cfg default.yaml
+
+``HsicLassoPruner`` operates purely on an in-memory model and does not ship a
+separate command-line interface.
 
 The repository provides a sample training configuration in ``default.yaml``.
 This file contains the dataset path and basic parameters used by
