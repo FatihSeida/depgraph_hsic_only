@@ -61,3 +61,4 @@ stand‑alone script.  To run via the module entry point::
 Or run ``prune.py`` directly::
 
     python prune.py --pretrained yolov8n-seg.pt --cfg default.yaml
+
