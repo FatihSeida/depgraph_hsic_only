@@ -1,0 +1,14 @@
+# Sample training configuration for DefaultYolov8SegPruner
+# Adjust paths and parameters as needed.
+
+# task type
+task: segment
+# dataset configuration
+data: coco128-seg.yaml
+# number of epochs for the initial training run
+epochs: 50
+# training batch size
+batch: 4
+# input image size
+imgsz: 640
+
