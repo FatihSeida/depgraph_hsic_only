@@ -16,13 +16,17 @@ from ultralytics import YOLO, __version__
 from ultralytics.nn.modules.block import C2f, Bottleneck
 from ultralytics.nn.modules.conv import Conv
 from ultralytics.engine.trainer import BaseTrainer
-from ultralytics.utils import (
-    yaml_load,
-    LOGGER,
-    RANK,
-    DEFAULT_CFG_DICT,
-    DEFAULT_CFG_KEYS,
-)
+try:  # pragma: no cover - fallback for older Ultralytics versions
+    from ultralytics.utils import (
+        yaml_load,
+        DEFAULT_CFG_DICT,
+        DEFAULT_CFG_KEYS,
+    )
+except Exception:  # pragma: no cover
+    from ultralytics.utils.files import yaml_load
+    from ultralytics.cfg import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS
+
+from ultralytics.utils import LOGGER, RANK
 from ultralytics.utils.checks import check_yaml
 from ultralytics.utils.torch_utils import de_parallel
 from ultralytics.nn.tasks import attempt_load_one_weight
