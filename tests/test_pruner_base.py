@@ -7,9 +7,6 @@ import pytest
 dummy_mod1 = types.ModuleType('depgraph_hsic_only.yolov8_pruner')
 dummy_mod1.DefaultYolov8SegPruner = object
 sys.modules.setdefault('depgraph_hsic_only.yolov8_pruner', dummy_mod1)
-dummy_mod2 = types.ModuleType('depgraph_hsic_only.hsic_pruner')
-dummy_mod2.HSICYolov8SegPruner = object
-sys.modules.setdefault('depgraph_hsic_only.hsic_pruner', dummy_mod2)
 
 from depgraph_hsic_only.pruner_base import Yolov8SegPruner
 
