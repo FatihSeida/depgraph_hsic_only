@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 
 if __package__:
     from .pipeline.yolo_pipeline import YoloPipeline
@@ -29,6 +30,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     """Instantiate the pipeline and execute it."""
     args = parse_args()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
     pipeline = YoloPipeline(model_path=args.pretrained, data=args.config)
     pipeline.run()
 
