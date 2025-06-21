@@ -8,8 +8,13 @@ import torch
 from ultralytics import YOLO
 
 from .base import BasePruningPipeline
-from prune_methods.hsic_lasso import HsicLassoPruner
-from metric_collector import YoloTrainingMetrics, YoloPruningMetrics
+
+if __package__ and __package__.startswith("depgraph_hsic_only"):
+    from ..prune_methods.hsic_lasso import HsicLassoPruner
+    from ..metric_collector import YoloTrainingMetrics, YoloPruningMetrics
+else:  # pragma: no cover - direct script execution
+    from prune_methods.hsic_lasso import HsicLassoPruner
+    from metric_collector import YoloTrainingMetrics, YoloPruningMetrics
 
 
 
