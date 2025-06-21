@@ -58,7 +58,7 @@ class HsicLassoPruner(BasePruningMethod):
 
         group_scores: dict[tp.Group, float] = {}
         for group in dependency_graph.get_all_groups():
-            names = [node.name for node in group.nodes]
+            names = [dep.target.name for dep, _ in group]
             kernels = []
             for nm in names:
                 X = feat_in[nm]
