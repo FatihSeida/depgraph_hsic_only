@@ -15,3 +15,11 @@ names:
   3: callus
 
 weights: [0.25, 1.0, 1.0, 1.0]
+
+# Training parameters
+# These values are used by the Ultralytics YOLO training API.
+epochs: 10  # number of training epochs
+batch: 4    # batch size
+imgsz: 640  # image size
+optimizer: SGD  # optimizer type
+

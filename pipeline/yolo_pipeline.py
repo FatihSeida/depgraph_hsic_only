@@ -22,7 +22,7 @@ else:  # pragma: no cover - direct script execution
 class YoloPipeline(BasePruningPipeline):
     """Concrete pruning pipeline for YOLOv8 segmentation."""
 
-    def __init__(self, model_path: str = "yolov8n-seg.pt", data: str = "biotech_model_train.yaml", epochs: int = 10, device: str | None = None):
+    def __init__(self, model_path: str = "yolov8n-seg.pt", data: str = "default.yaml", epochs: int = 10, device: str | None = None):
         self.model_path = Path(model_path)
         self.data = data
         self.epochs = epochs

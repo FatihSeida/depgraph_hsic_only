@@ -20,7 +20,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--config",
-        default="biotech_model_train.yaml",
+        default="default.yaml",
         help="Path to the training data configuration file",
     )
     return parser.parse_args()
