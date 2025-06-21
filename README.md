@@ -58,9 +58,9 @@ a ``requirements.txt`` file::
 
     pip install -r requirements.txt
 
-The default configuration expects the COCO128 segmentation dataset referenced
-in ``default.yaml`` (``data: coco128-seg.yaml``).  Ensure the dataset file is
-available locally or adjust the ``data`` path in the configuration.
+The ``default.yaml`` file defines dataset paths and training parameters that are
+compatible with the Ultralytics YOLO API.  Update these paths to point to your
+own dataset if necessary.
 
 Running the pruner requires a recent PyTorch installation and, ideally, access
 to a CUDA-capable GPU for training and pruning.
